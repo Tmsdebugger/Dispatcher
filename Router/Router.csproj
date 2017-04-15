@@ -46,6 +46,7 @@
     <Compile Include="Consumer2.cs" />
     <Compile Include="ConsumerBase.cs" />
     <Compile Include="ExpectEvtMsgAttribute.cs" />
+    <Compile Include="ExpectMsgAttribute.cs" />
     <Compile Include="ExpectReqMsgAttribute.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="Program.cs" />

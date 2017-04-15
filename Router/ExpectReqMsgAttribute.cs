@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Router
 {
-    class ExpectReqMsgAttribute : Attribute
+    public class ExpectReqMsgAttribute : ExpectMsgAttribute
     {
         public Type ExpectMsgType { get; set; }
 

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Router
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class ExpectEvtMsgAttribute : Attribute
+    
+    public class ExpectEvtMsgAttribute : ExpectMsgAttribute
     {
         public Type ExpectMsgType { get; set; }
 

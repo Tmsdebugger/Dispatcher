@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Router
 {
-    class ConsumerBase
+    abstract class ConsumerBase
     {
         protected IDispatcher<WorkerBase, ReqMsgBase> myRouter;
         public ConsumerBase(IDispatcher<WorkerBase, ReqMsgBase> router)

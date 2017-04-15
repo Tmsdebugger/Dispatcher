@@ -25,6 +25,7 @@ namespace Router
         {
             perfWatch.Reset();
             perfWatch.Start();
+
             MethodInfo targetMethod = null;
             var msgType = msg.GetType();
             if (msgHandlerCache.Keys.Contains(msgType))
@@ -34,33 +35,59 @@ namespace Router
             }
             else
             {
-                //TODO:how to implement a cache?
-                foreach (var workerType in targetLookup.Keys)
+                var targetMethods = GetExpectMethodInfo(msgType);
+
+                if (targetMethods.Count == 0)
                 {
-                    foreach (var method in workerType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
-                    {
-                        if (method.CustomAttributes.Any(ca => ca.ConstructorArguments.Any(a => (Type)a.Value == msgType)))
-                        {
-                            Console.WriteLine("find the matching attributes for request msg {0}", msgType);
-                            msgHandlerCache.Add(msgType, method);
-                            targetMethod = method;
-                            //method.Invoke(workerLookup[workerType], new object[] { msg });
-                        }
-                    }
+                    Console.WriteLine("Error: The msg {0} cannot be dispatched to any handlers, please check", msgType.Name);
+                }
+                else if (targetMethods.Count > 1)
+                {
+                    Console.WriteLine("Error: Find more than one handler for msg {0}, please check", msgType.Name);
+                }
+                else
+                {
+                    targetMethod = targetMethods.Single();
+                    msgHandlerCache.Add(msgType, targetMethod);
                 }
             }
 
             if (targetMethod != null)
             {
-
                 targetMethod.Invoke(targetLookup[targetMethod.ReflectedType], new object[] { msg });
+                perfWatch.Stop();
+                Console.WriteLine("Dispatch the message {0} cost {1} ms", msgType.Name, 1000.0 * (double)perfWatch.ElapsedTicks / Stopwatch.Frequency);
             }
-            //Thread.Sleep(10);
-            perfWatch.Stop();
-            Console.WriteLine("Dispatch the message cost {0} ms", 1000.0 * (double)perfWatch.ElapsedTicks/Stopwatch.Frequency);
         }
 
         private Stopwatch perfWatch = new Stopwatch();
+
+        private IList<MethodInfo> GetExpectMethodInfo(Type msgType)
+        {
+            List<MethodInfo> targetMethods = new List<MethodInfo>();
+            MethodInfo targetMethod = null;
+            foreach (var workerType in targetLookup.Keys)
+            {
+                try
+                {
+                    targetMethod = workerType.GetMethods(BindingFlags.Public | BindingFlags.Instance).SingleOrDefault(method =>
+                    method.CustomAttributes.Any(ca => ca.AttributeType.BaseType == typeof(ExpectMsgAttribute)
+                                            && ca.ConstructorArguments.Any(a => (Type)a.Value == msgType)));
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine("There are more than one handlers in one instance of {0} for msg {1}, please check", workerType.Name, msgType.Name);
+                }
+                if (targetMethod != null)
+                {
+                    Console.WriteLine("find the matching methods for msg {0} in {1}", msgType, workerType.Name);
+                    targetMethods.Add(targetMethod);
+                }
+            }
+
+            return targetMethods;
+        }
     }
 
     interface IDispatcher<T1, T2>

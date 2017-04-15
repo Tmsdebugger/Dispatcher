@@ -18,5 +18,7 @@ namespace Router
             Console.WriteLine("Worker2 is handling ReqMsg1 {0}", msg.Para1);
             myRouter.DispatchMsg(new EvtMsg1() { Para3="Veniza" });
         }
+
+
     }
 }

@@ -18,6 +18,8 @@ namespace Router
             Console.WriteLine("Consumer1 is handling EvtMsg2 {0}", msg.Para4);
         }
 
+
+
         public void InvokeReq2()
         {
             Console.WriteLine("Consumer1 is invoking ReqMsg2");
